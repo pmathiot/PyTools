@@ -13,10 +13,10 @@ import matplotlib.pyplot as plt
 print ""
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-f" , metavar='file_name'  , help="names of input files "               , type=str, nargs="+", required=True)
-parser.add_argument("-ij", metavar='index'      , help="i-,j-index of the point to check"    , type=int, nargs=2  , required=True)
-parser.add_argument("-ll", metavar='coord_name' , help="lon-,lat-variable name"              , type=str, nargs=2  , required=True)
-parser.add_argument("-v" , metavar='var_name'   , help="variable list"                       , type=str, nargs="+", required=True)
+parser.add_argument("-f" , metavar='file_name'        , help="names of input files "               , type=str, nargs="+", required=True)
+parser.add_argument("-ij", metavar='index'            , help="i-,j-index of the point to check"    , type=int, nargs=2  , required=True)
+parser.add_argument("-ll", metavar='lon/lat_var_name' , help="lon-,lat-variable name"              , type=str, nargs=2  , required=True)
+parser.add_argument("-v" , metavar='var_name'         , help="variable list"                       , type=str, nargs="+", required=True)
 
 args = parser.parse_args()
 
