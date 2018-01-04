@@ -24,9 +24,13 @@ def main():
     file_lst=glob.glob(csuf+"_????.nc")
     file_lst.sort()
     #
+    # regex definition
+    regex='^{}_(\d+)\.nc'.format(cpref)
+    revar = re.compile(r'%s'%regex,re.I)
+    #
     nfind=0
-    for file in file_lst:
-        ncid = Dataset(file)
+    for cfile in file_lst:
+        ncid = Dataset(cfile)
         [ibl,jbl]=ncid.DOMAIN_position_first
         if ((ibl<=iloc) and (jbl<=jloc)):
             [itr,jtr]=ncid.DOMAIN_position_last
@@ -34,7 +38,7 @@ def main():
             [ibl,jbl] = np.array([ibl,jbl]) + 1
             [itr,jtr] = np.array([itr,jtr]) + 1
             # get narea (find all number in file)
-            narea = re.findall(r'\d+', file)[0]
+            narea = re.findall(revar, cfile)[0]
             # 
             # check if in the file
             if ((ibl<=iloc<=itr) and (jbl<=jloc<=jtr)):
