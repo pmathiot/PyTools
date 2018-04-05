@@ -3,7 +3,7 @@
 # script to diagnose variable at a single point
 # wrote by P. Mathiot 06/2016
 
-from netCDF4 import Dataset
+import netCDF4 as nc
 import numpy as np
 import sys, re
 import argparse
@@ -14,18 +14,17 @@ def main():
     print ""
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f" , metavar='file_name'        , help="names of input files "               , type=str, nargs="+", required=True)
-    parser.add_argument("-ij", metavar='index'            , help="i-,j-index of the point to check"    , type=int, nargs=2  , required=True)
-    parser.add_argument("-ll", metavar='lon/lat_var_name' , help="lon-,lat-variable name"              , type=str, nargs=2  , required=True)
-    parser.add_argument("-v" , metavar='var_name'         , help="variable list"                       , type=str, nargs="+", required=True)
+    parser.add_argument("-f"   , metavar='file_name'        , help="names of input files "             , type=str, nargs="+", required=True)
+    parser.add_argument("-ij"  , metavar='index'            , help="i-,j-index of the point to check"  , type=int, nargs=2  , required=True)
+    parser.add_argument("-ll"  , metavar='lon/lat_var_name' , help="lon-,lat-variable name"            , type=str, nargs=2  , required=False)
+    parser.add_argument("-time", metavar='time_name'        , help="time-variable name"                , type=str, nargs=1  , required=False)
+    parser.add_argument("-v"   , metavar='var_name'         , help="variable list"                     , type=str, nargs="+", required=True)
     
     args = parser.parse_args()
     
     loc     = args.ij
-    coord   = args.ll
     cvar_lst= args.v
     jloc=int(loc[1]) ; iloc=int(loc[0])
-    clon = coord[0]  ; clat=coord[1]
     
     cfile_lst=args.f
     if len(cfile_lst) == 1:
@@ -42,15 +41,28 @@ def main():
     
         cfile   = args.f[0]
     
-        ncid = Dataset(cfile)
+        ncid = nc.Dataset(cfile)
         cvar_out = [cvar for cvar in cvar_lst if cvar not in ncid.variables.keys()]
     
         if cvar_out != []:
             print "E R R O R: "+" ".join(cvar_out),' not in '+cfile
         else:
-            rlon = ncid.variables[clon][jloc,iloc]
-            rlat = ncid.variables[clat][jloc,iloc]
-            print "check value into file {0} at point (i={1},j={2}) or (lon={3:.3f},lat={4:.3f}) :".format(cfile, iloc, jloc, rlon, rlat)
+            ctxtll='' ; ctxttime=''
+
+            if args.ll:
+                coord   = args.ll
+                cvlon= coord[0]  ; cvlat=coord[1]
+                rlon = ncid.variables[cvlon][jloc,iloc]
+                rlat = ncid.variables[cvlat][jloc,iloc]
+                ctxtll= "(ie lon={0:.3f},lat={1:.3f}) ".format( rlon, rlat)
+
+            if args.time:
+                cvtime  = args.time[0]
+                rtime = nc.num2date(ncid.variables[cvtime][0].squeeze(), ncid.variables[cvtime].units, "noleap")
+                ctxttime= "at time {0} ".format(rtime)
+
+            print ""
+            print "check value into file {0} at point i={1} and j={2} {3}{4}:".format(cfile, iloc, jloc, ctxtll, ctxttime)
             print "----------------------------"
             print ""
             for cvar in cvar_lst:
@@ -63,7 +75,7 @@ def main():
                 # get dim
                 ndim = len(ncid.variables[cvar].dimensions)
                 if ndim == 4:
-                    data = ncid.variables[cvar][:,:,jloc,iloc]
+                    data = ncid.variables[cvar][0,:,jloc,iloc]
                     if 1 in data.shape:
                         print "{0:<20s} ({1:>13s}) = ".format(cvar,cunit)+" ".join(["{0:14.6e}".format(rdat) for rdat in np.squeeze(data)])
                     else:
@@ -82,7 +94,7 @@ def main():
     if nfile > 1:
         nerr = 0
         for cfile in args.f[:]: 
-            ncid = Dataset(cfile)
+            ncid = nc.Dataset(cfile)
             cvar_out = [cvar for cvar in cvar_lst if cvar not in ncid.variables.keys()]
             if cvar_out != []:
                 print "E R R O R: "+" ".join(cvar_out),' not in '+cfile
@@ -95,7 +107,7 @@ def main():
         cunit= []
         cname= []
         ndim = np.zeros(nvar)
-        ncid = Dataset(args.f[0])
+        ncid = nc.Dataset(args.f[0])
         rlon = ncid.variables[clon][jloc,iloc]
         rlat = ncid.variables[clat][jloc,iloc]
         jvar=-1
@@ -121,7 +133,7 @@ def main():
             jt += 1
             print cfile
     
-            ncid = Dataset(cfile)
+            ncid = nc.Dataset(cfile)
     
             for jvar in range(0,nvar):
                 cvar = cvar_lst[jvar]
