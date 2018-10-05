@@ -82,7 +82,7 @@ def check_attvalue(dict1, dict2, ctxt):
     if lstequa != []:
         for att in lstequa:
             if dict1[att] != dict2[att]:
-                print ('\n  WARNING {} {:<20} have different value: {:<40} | {:<40}        (file1 val. | file2 val.)' \
+                print('\n  WARNING {} {:<20} have different value: {:<40} | {:<40}        (file1 val. | file2 val.)' \
                     .format(ctxt, att, str(dict1[att]), str(dict2[att])), end='')
                 nerror = 1
     add_whiteline(nerror)
@@ -104,7 +104,7 @@ def check_dimvalue(dict1, dict2, ctxt):
     if lstequa != set():
         for att in lstequa:
             if len(dict1[att]) != len(dict2[att]):
-                print ('\n  WARNING {} {:<15} have different size: {: 4d} | {: 4d}         (file1 val. | file2 val.)' \
+                print('\n  WARNING {} {:<15} have different size: {: 4d} | {: 4d}         (file1 val. | file2 val.)' \
                     .format(ctxt, att, len(dict1[att]), len(dict2[att])), end='')
                 nerror = 1
     add_whiteline(nerror)
