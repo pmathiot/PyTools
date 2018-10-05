@@ -82,7 +82,7 @@ def check_attvalue(dict1, dict2, ctxt):
     if lstequa != []:
         for att in lstequa:
             if dict1[att] != dict2[att]:
-                print ('\n  WARNING {} {:<15} have different value: {:<20} | {:<20}        (file1 val. | file2 val.)' \
+                print ('\n  WARNING {} {:<20} have different value: {:<40} | {:<40}        (file1 val. | file2 val.)' \
                     .format(ctxt, att, str(dict1[att]), str(dict2[att])), end='')
                 nerror = 1
     add_whiteline(nerror)
@@ -191,7 +191,7 @@ def main():
         print_progress(ivar, len(varlst))
 
         if not np.array_equal(nc1.variables[name][...], nc2.variables[name][...]):
-            print(' WARNING {:<15} data are different'.format(name))
+            print('\n WARNING {:<15} data are different'.format(name))
             print()
     print('\n')
 
