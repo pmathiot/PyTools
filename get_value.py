@@ -23,9 +23,15 @@ def main():
     parser.add_argument("-ij", metavar='index', help="i-,j-index of the point to check", type=int, nargs=2, required=True)
     parser.add_argument("-ll", metavar='lon/lat_var_name', help="lon-,lat-variable name", type=str, nargs=2, required=False)
     parser.add_argument("-time", metavar='time_name', help="time-variable name", type=str, nargs=1, required=False)
+    parser.add_argument("-kt", metavar='time_index', help="time-index", type=int, nargs=1  , required=False)
     parser.add_argument("-v", metavar='var_name', help="variable list", type=str, nargs="+", required=True)
 
     args = parser.parse_args()
+
+    if args.kt:
+        it = args.kt[0]
+    else:
+        it=0
 
     loc = args.ij
     cvar_lst = args.v
@@ -68,7 +74,10 @@ def main():
 
             if args.time:
                 cvtime = args.time[0]
-                rtime = nc.num2date(ncid.variables[cvtime][0].squeeze(), ncid.variables[cvtime].units, "noleap")
+                timeatt_dic = ncid.variables[cvtime].__dict__
+                if 'calendar' in timeatt_dic.keys():
+                    ccal = timeatt_dic['calendar']
+                rtime = nc.num2date(ncid.variables[cvtime][it].squeeze(), ncid.variables[cvtime].units, ccal)
                 ctxttime = "at time {0} ".format(rtime)
 
             print()
