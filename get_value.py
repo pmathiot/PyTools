@@ -94,15 +94,13 @@ def main():
                 # get dim
                 ndim = len(ncid.variables[cvar].dimensions)
                 if ndim == 4:
-                    data = ncid.variables[cvar][0, :, jloc, iloc]
+                    data = ncid.variables[cvar][it, :, jloc, iloc]
                     if 1 in data.shape:
-                        print("{0:<20s} ({1:>13s}) = ".format(cvar, cunit) \
-                            +" ".join(["{0:14.6e}".format(rdat) for rdat in np.squeeze(data)]))
+                        print("{0:<20s} ({1:>13s}) = {2:14.6e}".format(cvar, cunit, data[0]))
                     else:
-                        print("{0:<20s} ({1:>13s}) = ".format(cvar, cunit) \
-                            +" ".join(["{0:14.6e}".format(rdat) for rdat in data[0]]))
+                        print("{0:<20s} ({1:>13s}) = {2:14.6e}".format(cvar, cunit, data[0]))
                         for k in range(1, data.shape[0]):
-                            print("{0:<39s}".format('')+" ".join(["{0:14.6e}".format(rdat) for rdat in data[k]]))
+                            print("{0:<38s} {1:14.6e}".format('',data[k]))
                 if ndim == 3:
                     data = ncid.variables[cvar][0, jloc, iloc]
                     print("{0:<20s} ({1:>13s}) = {2:14.6e}".format(cvar, cunit, data))
