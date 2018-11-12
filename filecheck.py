@@ -189,9 +189,15 @@ def main():
     for ivar, name in enumerate(varlst, 1):
 
         print_progress(ivar, len(varlst))
-
-        if not np.array_equal(nc1.variables[name][...], nc2.variables[name][...]):
+        data1 = nc1.variables[name][...]
+        data2 = nc2.variables[name][...]
+        if not np.array_equal(data1, data2):
             print('\n WARNING {:<15} data are different'.format(name))
+            data_diff = data1 - data2
+            idx_max = np.unravel_index(np.argmax(data_diff), data_diff.shape)
+            idx_min = np.unravel_index(np.argmin(data_diff), data_diff.shape)
+            print('max (idx, diff, data1, data2) : {}, {}, {}, {}'.format(idx_max, data_diff[idx_max], data1[idx_max], data2[idx_max])) 
+            print('min (idx, diff, data1, data2) : {}, {}, {}, {}'.format(idx_min, data_diff[idx_min], data1[idx_min], data2[idx_min]))
             print()
     print('\n')
 

@@ -11,6 +11,15 @@ import glob
 import netCDF4 as nc
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+def get_time(ncid,cvtime,it):
+    timeatt_dic = ncid.variables[cvtime].__dict__
+    if 'calendar' in timeatt_dic.keys():
+        ccal = timeatt_dic['calendar']
+    rtime = nc.num2date(ncid.variables[cvtime][it].squeeze(), ncid.variables[cvtime].units, ccal)
+    return rtime
+
 
 def main():
     """
@@ -50,36 +59,30 @@ def main():
         print('E R R O R: get_value need at least one file.')
         sys.exit(666)
 
+    ctxtll = ''
+    ctxttime = ''
+    cfile = args.f[0]
+    ncid = nc.Dataset(cfile)
+
+    if args.time:
+        rtime = get_time(ncid, args.time[0], it)
+        ctxttime = "at time {0} ".format(rtime)
+
+    if args.ll:
+        coord   = args.ll
+        clon = coord[0]  ; clat=coord[1]
+        rlon = ncid.variables[clon][jloc,iloc]
+        rlat = ncid.variables[clat][jloc,iloc]
+        ctxtll = "(ie lon = {0:.3f}, lat = {1:.3f}) ".format(rlon, rlat)
+
     if nfile == 1:
 
-        cfile = args.f[0]
-
-        ncid = nc.Dataset(cfile)
         cvar_out = [cvar for cvar in cvar_lst if cvar not in ncid.variables.keys()]
 
         if cvar_out != []:
             print("E R R O R: "+" ".join(cvar_out), ' not in '+cfile)
             sys.exit(666)
         else:
-            ctxtll = ''
-            ctxttime = ''
-
-            if args.ll:
-                coord = args.ll
-                cvlon = coord[0]
-                cvlat = coord[1]
-                rlon = ncid.variables[cvlon][jloc, iloc]
-                rlat = ncid.variables[cvlat][jloc, iloc]
-                ctxtll = "(ie lon = {0:.3f}, lat = {1:.3f}) ".format(rlon, rlat)
-
-            if args.time:
-                cvtime = args.time[0]
-                timeatt_dic = ncid.variables[cvtime].__dict__
-                if 'calendar' in timeatt_dic.keys():
-                    ccal = timeatt_dic['calendar']
-                rtime = nc.num2date(ncid.variables[cvtime][it].squeeze(), ncid.variables[cvtime].units, ccal)
-                ctxttime = "at time {0} ".format(rtime)
-
             print()
             print("check value into file {0} at point i = {1} and j = {2} {3}{4}:".format(cfile, iloc, jloc, ctxtll, ctxttime))
             print("----------------------------")
@@ -126,10 +129,11 @@ def main():
         cunit = []
         cname = []
         ndim = np.zeros(nvar)
-        ncid = nc.Dataset(args.f[0])
-        rlon = ncid.variables[cvlon][jloc, iloc]
-        rlat = ncid.variables[cvlat][jloc, iloc]
+        nt = np.zeros(nfile)
+        rtime = [None]*nfile
+        
         jvar = -1
+        ncid = nc.Dataset(args.f[0])
         for cvar in cvar_lst:
             jvar += 1
             # fill name and unit vector for plot
@@ -154,6 +158,11 @@ def main():
 
             ncid = nc.Dataset(cfile)
 
+            if args.time:
+                rtime[jt] = get_time(ncid, args.time[0], it)._to_real_datetime()
+            else:
+                rtime = [(ifile + 0.5)/12 for ifile in range(0, nfile)]
+            
             # use enumerate for jvar, cvar in enumerate(cvar_lst)
             for jvar, cvar in enumerate(cvar_lst):
                 ncid.variables[cvar].set_auto_maskandscale(False)
@@ -168,13 +177,16 @@ def main():
             ncid.close()
 
         plt.figure(figsize=(8.27, 11.69))
-        time = [(jt + 0.5)/12 for jt in range(0, nfile)]
         for jvar in range(0, nvar):
             ax = plt.subplot(nvar, 1, jvar+1)
-            ax.plot(time[:], data[jvar, :], '-')
+            ax.plot_date(rtime[:], data[jvar, :], '-')
             ax.set_title(cname[jvar]+' at '+' ({:.3f}, {:.3f}) in {} '.format(rlon, rlat, crun))
             ax.set_ylabel(cunit[jvar])
             ax.grid(True)
+
+# rotates and right aligns the x labels, and moves the bottom of the
+# axes up to make room for them
+            plt.gcf().autofmt_xdate()
         plt.tight_layout()
         plt.savefig(crun+'_'+"_".join(cvar for cvar in cvar_lst)+'.eps', format='eps', dpi=150)
         plt.show()
