@@ -1,2 +1,2 @@
 # PyTools
-Basics tools I use when NEMO is not cooperative
+Basics tools I use when NEMO is not cooperative.
