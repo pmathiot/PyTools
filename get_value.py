@@ -23,7 +23,7 @@ def get_time(ncid,cvtime,it):
 
 def main():
     """
-    script to diagnose variable at a single point
+    script to diagnose variable at a single point.
     """
     print()
 
